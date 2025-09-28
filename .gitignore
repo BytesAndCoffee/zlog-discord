@@ -1,7 +1,7 @@
 __pycache__/
 *.pyc
 .venv/
-.env
+src/zlog-discord/.env
 .DS_Store
 pytest_cache/
 docker-compose.override.yml
