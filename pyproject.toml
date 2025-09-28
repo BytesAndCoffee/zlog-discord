@@ -2,6 +2,7 @@
 name = "zlog-discord"
 version = "0.1.0"
 description = ""
+package-mode = false
 authors = [
     {name = "Michael Yazdani",email = "yazdmich@icloud.com"}
 ]
