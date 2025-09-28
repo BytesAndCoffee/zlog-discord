@@ -1,15 +1,42 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
 
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.11.6"
-      - run: pip install poetry
-      - run: poetry install
-      - run: poetry run pytest
+          python-version: "3.11"
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+
+      # --- OPTION 1: Use per-key secrets (preferred) ---
+      - name: Export DB secrets
+        if: ${{ secrets.DATABASE_HOST != '' }}
+        run: |
+          echo "DATABASE_HOST=${{ secrets.DATABASE_HOST }}" >> $GITHUB_ENV
+          echo "DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}" >> $GITHUB_ENV
+          echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> $GITHUB_ENV
+          echo "DATABASE=${{ secrets.DATABASE }}" >> $GITHUB_ENV
+
+      # --- OPTION 2: Use a single DOTENV_FILE secret ---
+      - name: Write .env from secret
+        if: ${{ secrets.DOTENV_FILE != '' }}
+        run: echo "${{ secrets.DOTENV_FILE }}" > .env
+
+      - name: Run tests
+        run: poetry run pytest --maxfail=1 --disable-warnings -q
